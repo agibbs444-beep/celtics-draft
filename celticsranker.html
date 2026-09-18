@@ -1,666 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Celtics Draft Tracker</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0c2340;
-            color: #333;
-            padding: 0;
-            margin: 0;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            background: #f0f2f5;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #0c2340 0%, #1a3a52 100%);
-            color: white;
-            padding: 12px 16px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .header h1 {
-            font-size: 1.4em;
-            font-weight: 700;
-        }
-
-        .stats {
-            display: flex;
-            gap: 16px;
-            font-size: 0.9em;
-            background: rgba(255,255,255,0.1);
-            padding: 8px 12px;
-            border-radius: 6px;
-            justify-content: space-between;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-label {
-            font-size: 0.75em;
-            opacity: 0.9;
-        }
-
-        .stat-value {
-            font-size: 1.2em;
-            font-weight: 700;
-        }
-
-        .tabs {
-            display: flex;
-            background: white;
-            border-bottom: 1px solid #ddd;
-            overflow-x: auto;
-            scroll-behavior: smooth;
-        }
-
-        .tabs::-webkit-scrollbar {
-            display: none;
-        }
-
-        .tab-btn {
-            flex: 1;
-            min-width: 100px;
-            padding: 12px 8px;
-            border: none;
-            background: white;
-            color: #666;
-            font-weight: 600;
-            font-size: 0.9em;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            overflow: hidden;
-        }
-
-        .tab-btn.active {
-            color: #0c2340;
-            border-bottom-color: #0c2340;
-        }
-
-        .tab-btn:active {
-            background: #f5f5f5;
-        }
-
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .content::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .content::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .content::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 3px;
-        }
-
-        .game-card {
-            background: white;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 8px;
-            border-left: 4px solid #ddd;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            position: relative;
-            touch-action: manipulation;
-        }
-
-        .game-card:active {
-            transform: scale(0.98);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .game-card.picked {
-            background: #e8e8e8;
-            opacity: 0.6;
-        }
-
-        .game-card.picked .game-content {
-            text-decoration: line-through;
-            color: #999;
-        }
-
-        .tier-1-13 { border-left-color: #FFD700; }
-        .tier-1-13.picked { border-left-color: #DAA520; }
-
-        .tier-14-20 { border-left-color: #FF8C00; }
-        .tier-14-20.picked { border-left-color: #FF7F00; }
-
-        .tier-21-24 { border-left-color: #FF6B6B; }
-        .tier-21-24.picked { border-left-color: #DC143C; }
-
-        .tier-25-29 { border-left-color: #9B59B6; }
-        .tier-25-29.picked { border-left-color: #6A0572; }
-
-        .checkbox {
-            width: 24px;
-            height: 24px;
-            border: 2px solid #ccc;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            font-size: 1.2em;
-            color: #0c2340;
-            background: white;
-        }
-
-        .game-card.picked .checkbox {
-            background: #0c2340;
-            border-color: #0c2340;
-            color: white;
-        }
-
-        .game-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .game-rank {
-            font-size: 0.85em;
-            color: #999;
-            font-weight: 600;
-        }
-
-        .game-opponent {
-            font-weight: 700;
-            font-size: 1.1em;
-            color: #333;
-        }
-
-        .game-info {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 2px;
-        }
-
-        .game-value {
-            text-align: right;
-            flex-shrink: 0;
-            min-width: 50px;
-        }
-
-        .game-value-score {
-            font-weight: 700;
-            font-size: 1.1em;
-            color: #0c2340;
-        }
-
-        .game-value-day {
-            font-size: 0.75em;
-            color: #999;
-        }
-
-        .day-badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.75em;
-            font-weight: 600;
-            margin-left: 6px;
-        }
-
-        .fri-badge { background: #FFD700; color: #333; }
-        .sat-badge { background: #FF8C00; color: white; }
-        .thu-badge { background: #87CEEB; color: #333; }
-        .sun-badge { background: #90EE90; color: #333; }
-        .mon-badge { background: #D3D3D3; color: #333; }
-        .tue-badge { background: #FFB6C1; color: #333; }
-        .wed-badge { background: #DDA0DD; color: white; }
-
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 300px;
-            text-align: center;
-            color: #999;
-        }
-
-        .empty-state-emoji {
-            font-size: 3em;
-            margin-bottom: 12px;
-        }
-
-        .empty-state h3 {
-            font-size: 1.1em;
-            margin-bottom: 4px;
-            color: #666;
-        }
-
-        .footer {
-            background: white;
-            border-top: 1px solid #ddd;
-            padding: 12px 16px;
-            display: flex;
-            gap: 8px;
-            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
-        }
-
-        .btn {
-            flex: 1;
-            padding: 10px 12px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.9em;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-reset {
-            background: #e8e8e8;
-            color: #333;
-        }
-
-        .btn-reset:active {
-            background: #d0d0d0;
-        }
-
-        .btn-stats {
-            background: #0c2340;
-            color: white;
-        }
-
-        .btn-stats:active {
-            background: #051829;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 200;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            font-size: 1.3em;
-            font-weight: 700;
-            margin-bottom: 16px;
-            color: #0c2340;
-        }
-
-        .modal-stat {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #eee;
-            font-size: 0.95em;
-        }
-
-        .modal-stat:last-child {
-            border-bottom: none;
-        }
-
-        .modal-label {
-            color: #666;
-        }
-
-        .modal-value {
-            font-weight: 700;
-            color: #0c2340;
-        }
-
-        .modal-close {
-            background: #0c2340;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            width: 100%;
-            margin-top: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.95em;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Celtics Draft Tracker</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{font-family:system-ui;background:#0c2340;height:100%;width:100%;overflow:hidden}
+body{display:flex}
+.app{display:flex;flex-direction:column;height:100vh;width:100%;background:#f0f2f5}
+.header{background:linear-gradient(135deg,#0c2340 0%,#1a3a52 100%);color:white;padding:12px 16px;box-shadow:0 2px 8px rgba(0,0,0,.3);flex-shrink:0}
+.header h1{font-size:1.3em;margin-bottom:8px;font-weight:700}
+.stats{display:flex;gap:20px;background:rgba(255,255,255,.1);padding:8px 12px;border-radius:6px;text-align:center}
+.stat{flex:1}
+.stat-val{font-size:1.2em;font-weight:700}
+.stat-label{font-size:.75em;opacity:.9;margin-top:2px}
+.tabs{display:flex;background:white;border-bottom:1px solid #ddd;flex-shrink:0}
+.tab{flex:1;padding:12px;border:none;background:white;font-weight:600;border-bottom:3px solid transparent;cursor:pointer;color:#666;font-size:.95em;transition:.2s}
+.tab.active{color:#0c2340;border-bottom-color:#0c2340;background:#f5f5f5}
+.tab:active{background:#ebebeb}
+.list{flex:1;overflow-y:auto;padding:8px;-webkit-overflow-scrolling:touch}
+.game{background:white;padding:12px;margin-bottom:8px;border-radius:8px;border-left:4px solid #FFD700;display:flex;gap:10px;align-items:center;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.game.clickable{cursor:pointer}
+.game.clickable:active{transform:scale(0.98);box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.game.picked{background:#e8e8e8;opacity:.6}
+.game.picked .team{text-decoration:line-through;color:#999}
+.game.gold{border-left-color:#FFD700}
+.game.orange{border-left-color:#FF8C00}
+.game.red{border-left-color:#FF6B6B}
+.game.purple{border-left-color:#9B59B6}
+.check{width:22px;height:22px;border:2px solid #ccc;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;color:#0c2340;background:white;font-size:1em}
+.game.picked .check{background:#0c2340;color:white;border:2px solid #0c2340}
+.info{flex:1;min-width:0}
+.rank{font-size:.8em;color:#999;font-weight:600}
+.team{font-weight:700;font-size:1em;color:#333}
+.date{font-size:.8em;color:#666;margin-top:2px}
+.val{text-align:right;font-weight:700;color:#0c2340;min-width:45px;font-size:.95em}
+.footer{background:white;padding:10px;display:flex;gap:8px;border-top:1px solid #ddd;flex-shrink:0}
+.btn{flex:1;padding:10px;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:.9em;text-transform:uppercase;touch-action:manipulation}
+.btn-main{background:#0c2340;color:white}
+.btn-main:active{background:#051829}
+.btn-secondary{background:#e8e8e8;color:#333}
+.btn-secondary:active{background:#d0d0d0}
+.empty{text-align:center;padding:40px 20px;color:#999}
+.empty-emoji{font-size:3em;margin-bottom:10px}
+.empty h3{font-size:1.1em;margin-bottom:4px;color:#666}
+</style>
 </head>
 <body>
-    <div class="app-container">
-        <div class="header">
-            <div class="header-content">
-                <h1>🏀 DRAFT TRACKER</h1>
-            </div>
-            <div class="stats">
-                <div class="stat-item">
-                    <div class="stat-label">Picked</div>
-                    <div class="stat-value" id="pickedCount">0</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">Remaining</div>
-                    <div class="stat-value" id="remainingCount">40</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">Progress</div>
-                    <div class="stat-value" id="progressPercent">0%</div>
-                </div>
-            </div>
-        </div>
+<div class="app">
+<div class="header">
+<h1>🏀 DRAFT TRACKER</h1>
+<div class="stats">
+<div class="stat"><div class="stat-val" id="pickedCount">0</div><div class="stat-label">Picked</div></div>
+<div class="stat"><div class="stat-val" id="remainCount">40</div><div class="stat-label">Remain</div></div>
+<div class="stat"><div class="stat-val" id="donePercent">0%</div><div class="stat-label">Done</div></div>
+</div>
+</div>
 
-        <div class="tabs" id="tabsContainer">
-            <button class="tab-btn active" data-tab="remaining">Remaining (40)</button>
-            <button class="tab-btn" data-tab="picked">Picked (0)</button>
-        </div>
+<div class="tabs">
+<button class="tab active" data-mode="remaining">Remaining</button>
+<button class="tab" data-mode="picked">Picked</button>
+</div>
 
-        <div class="content" id="contentArea">
-            <div id="remaining" class="tab-content"></div>
-            <div id="picked" class="tab-content" style="display:none;"></div>
-        </div>
+<div class="list" id="gameList"></div>
 
-        <div class="footer">
-            <button class="btn btn-reset" onclick="resetDraft()">↻ Reset</button>
-            <button class="btn btn-stats" onclick="showStats()">📊 Stats</button>
-        </div>
-    </div>
+<div class="footer">
+<button class="btn btn-secondary" id="resetBtn">↻ Reset</button>
+<button class="btn btn-main" id="statsBtn">📊 Stats</button>
+</div>
+</div>
 
-    <div class="modal" id="statsModal">
-        <div class="modal-content">
-            <div class="modal-header">Draft Statistics</div>
-            <div id="statsContent"></div>
-            <button class="modal-close" onclick="closeStats()">Close</button>
-        </div>
-    </div>
-
-    <script>
-        const games = [
-            { rank: 1, opponent: 'PHI', date: 'Jan 21', day: 'Thu', value: 9.56, tier: '1' },
-            { rank: 2, opponent: 'PHI', date: 'Mar 7', day: 'Sun', value: 9.46, tier: '1' },
-            { rank: 3, opponent: 'OKC', date: 'Mar 12', day: 'Fri', value: 17.06, tier: '1' },
-            { rank: 4, opponent: 'NYK', date: 'Oct 23', day: 'Fri', value: 9.46, tier: '1' },
-            { rank: 5, opponent: 'SAS', date: 'Mar 24', day: 'Wed', value: 15.84, tier: '1' },
-            { rank: 6, opponent: 'MIA', date: 'Dec 25', day: 'Fri', value: 10.15, tier: '2' },
-            { rank: 7, opponent: 'MIN', date: 'Feb 12', day: 'Fri', value: 15.14, tier: '1' },
-            { rank: 8, opponent: 'HOU', date: 'Jan 11', day: 'Mon', value: 14.80, tier: '1' },
-            { rank: 9, opponent: 'GSW', date: 'Feb 10', day: 'Wed', value: 13.60, tier: '1' },
-            { rank: 10, opponent: 'DAL', date: 'Nov 15', day: 'Sun', value: 12.02, tier: '1' },
-            { rank: 11, opponent: 'LAL', date: 'Feb 2', day: 'Tue', value: 14.92, tier: '1' },
-            { rank: 12, opponent: 'DEN', date: 'Feb 9', day: 'Tue', value: 15.88, tier: '1' },
-            { rank: 13, opponent: 'DET', date: 'Dec 20', day: 'Sun', value: 8.18, tier: '1' },
-            { rank: 14, opponent: 'NYK', date: 'Jan 13', day: 'Wed', value: 8.56, tier: '1' },
-            { rank: 15, opponent: 'PHX', date: 'Jan 29', day: 'Fri', value: 13.65, tier: '2' },
-            { rank: 16, opponent: 'WAS', date: 'Dec 14', day: 'Mon', value: 7.68, tier: '1' },
-            { rank: 17, opponent: 'WAS', date: 'Dec 16', day: 'Wed', value: 7.28, tier: '1' },
-            { rank: 18, opponent: 'UTA', date: 'Dec 18', day: 'Fri', value: 12.55, tier: '2' },
-            { rank: 19, opponent: 'CLE', date: 'Feb 26', day: 'Fri', value: 10.30, tier: '2' },
-            { rank: 20, opponent: 'CHI', date: 'Oct 30', day: 'Fri', value: 13.88, tier: '3' },
-            { rank: 21, opponent: 'ATL', date: 'Nov 27', day: 'Fri', value: 13.88, tier: '3' },
-            { rank: 22, opponent: 'MIA', date: 'Apr 2', day: 'Fri', value: 10.15, tier: '2' },
-            { rank: 23, opponent: 'TOR', date: 'Feb 14', day: 'Sun', value: 10.88, tier: '4' },
-            { rank: 24, opponent: 'NOP', date: 'Mar 21', day: 'Sun', value: 13.22, tier: '3' },
-            { rank: 25, opponent: 'CHA', date: 'Jan 23', day: 'Sat', value: 12.00, tier: '4' },
-            { rank: 26, opponent: 'ORL', date: 'Mar 18', day: 'Thu', value: 9.10, tier: '2' },
-            { rank: 27, opponent: 'CLE', date: 'Dec 28', day: 'Mon', value: 9.05, tier: '1' },
-            { rank: 28, opponent: 'BKN', date: 'Jan 16', day: 'Sat', value: 12.00, tier: '4' },
-            { rank: 29, opponent: 'TOR', date: 'Jan 25', day: 'Mon', value: 7.92, tier: '1' },
-            { rank: 30, opponent: 'MEM', date: 'Mar 11', day: 'Thu', value: 11.00, tier: '4' },
-            { rank: 31, opponent: 'CHI', date: 'Oct 26', day: 'Mon', value: 11.38, tier: '4' },
-            { rank: 32, opponent: 'POR', date: 'Dec 23', day: 'Wed', value: 11.30, tier: '2' },
-            { rank: 33, opponent: 'IND', date: 'Jan 20', day: 'Wed', value: 7.65, tier: '2' },
-            { rank: 34, opponent: 'ORL', date: 'Nov 16', day: 'Mon', value: 8.60, tier: '2' },
-            { rank: 35, opponent: 'MIL', date: 'Apr 11', day: 'Sun', value: 10.50, tier: '4' },
-            { rank: 36, opponent: 'LAC', date: 'Jan 27', day: 'Wed', value: 10.24, tier: '3' },
-            { rank: 37, opponent: 'SAC', date: 'Mar 16', day: 'Tue', value: 9.00, tier: '4' },
-            { rank: 38, opponent: 'CHA', date: 'Dec 2', day: 'Wed', value: 8.00, tier: '4' },
-            { rank: 39, opponent: 'MIL', date: 'Nov 4', day: 'Wed', value: 8.00, tier: '4' },
-            { rank: 40, opponent: 'BKN', date: 'Oct 27', day: 'Tue', value: 9.00, tier: '4' }
-        ];
-
-        let pickedGames = [];
-
-        const getTierClass = (tier) => {
-            if (['1'].includes(tier)) return 'tier-1-13';
-            if (['2'].includes(tier)) return 'tier-14-20';
-            if (['3'].includes(tier)) return 'tier-21-24';
-            return 'tier-25-29';
-        };
-
-        const getDayClass = (day) => {
-            const dayMap = {
-                'Mon': 'mon-badge',
-                'Tue': 'tue-badge',
-                'Wed': 'wed-badge',
-                'Thu': 'thu-badge',
-                'Fri': 'fri-badge',
-                'Sat': 'sat-badge',
-                'Sun': 'sun-badge'
-            };
-            return dayMap[day] || 'mon-badge';
-        };
-
-        const renderGameCard = (game, isPicked = false) => {
-            const div = document.createElement('div');
-            div.className = `game-card ${getTierClass(game.tier)} ${isPicked ? 'picked' : ''}`;
-            div.onclick = () => togglePick(game.rank);
-            
-            div.innerHTML = `
-                <div class="checkbox">${isPicked ? '✓' : ''}</div>
-                <div class="game-content">
-                    <div class="game-rank">#${game.rank}</div>
-                    <div class="game-opponent">${game.opponent}</div>
-                    <div class="game-info">${game.date} <span class="day-badge ${getDayClass(game.day)}">${game.day}</span></div>
-                </div>
-                <div class="game-value">
-                    <div class="game-value-score">${game.value.toFixed(2)}</div>
-                    <div class="game-value-day">Tier ${game.tier}</div>
-                </div>
-            `;
-            
-            return div;
-        };
-
-        const renderGames = () => {
-            const remaining = games.filter(g => !pickedGames.includes(g.rank));
-            
-            const remainingDiv = document.getElementById('remaining');
-            remainingDiv.innerHTML = '';
-            
-            if (remaining.length === 0) {
-                remainingDiv.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-emoji">🎉</div>
-                        <h3>Draft Complete!</h3>
-                        <p>All 40 games have been picked</p>
-                    </div>
-                `;
-            } else {
-                remaining.forEach(game => {
-                    remainingDiv.appendChild(renderGameCard(game, false));
-                });
-            }
-            
-            const pickedDiv = document.getElementById('picked');
-            pickedDiv.innerHTML = '';
-            
-            const pickedGamesList = games.filter(g => pickedGames.includes(g.rank)).sort((a, b) => {
-                return pickedGames.indexOf(a.rank) - pickedGames.indexOf(b.rank);
-            });
-            
-            if (pickedGamesList.length === 0) {
-                pickedDiv.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-emoji">🔍</div>
-                        <h3>No Picks Yet</h3>
-                        <p>Click games to mark them as picked</p>
-                    </div>
-                `;
-            } else {
-                pickedGamesList.forEach(game => {
-                    pickedDiv.appendChild(renderGameCard(game, true));
-                });
-            }
-            
-            updateStats();
-        };
-
-        const togglePick = (rank) => {
-            if (pickedGames.includes(rank)) {
-                pickedGames = pickedGames.filter(r => r !== rank);
-            } else {
-                pickedGames.push(rank);
-            }
-            renderGames();
-        };
-
-        const updateStats = () => {
-            const picked = pickedGames.length;
-            const remaining = 40 - picked;
-            const progress = Math.round((picked / 40) * 100);
-            
-            document.getElementById('pickedCount').textContent = picked;
-            document.getElementById('remainingCount').textContent = remaining;
-            document.getElementById('progressPercent').textContent = progress + '%';
-            
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                if (btn.dataset.tab === 'picked') {
-                    btn.textContent = `Picked (${picked})`;
-                }
-            });
-        };
-
-        const resetDraft = () => {
-            if (pickedGames.length > 0 && confirm('Reset all picks?')) {
-                pickedGames = [];
-                renderGames();
-                switchTab('remaining');
-            }
-        };
-
-        const switchTab = (tab) => {
-            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-            document.getElementById(tab).style.display = 'block';
-            
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-        };
-
-        const showStats = () => {
-            const picked = pickedGames.length;
-            const remaining = 40 - picked;
-            const pickedGamesList = games.filter(g => pickedGames.includes(g.rank));
-            
-            const totalValue = pickedGamesList.reduce((sum, g) => sum + g.value, 0);
-            const avgValue = picked > 0 ? (totalValue / picked).toFixed(2) : 0;
-            
-            const byDay = {};
-            pickedGamesList.forEach(g => {
-                byDay[g.day] = (byDay[g.day] || 0) + 1;
-            });
-            
-            let stats = `
-                <div class="modal-stat">
-                    <span class="modal-label">Games Picked</span>
-                    <span class="modal-value">${picked}/40</span>
-                </div>
-                <div class="modal-stat">
-                    <span class="modal-label">Remaining</span>
-                    <span class="modal-value">${remaining}</span>
-                </div>
-                <div class="modal-stat">
-                    <span class="modal-label">Total Value</span>
-                    <span class="modal-value">${totalValue.toFixed(2)}</span>
-                </div>
-                <div class="modal-stat">
-                    <span class="modal-label">Avg Value</span>
-                    <span class="modal-value">${avgValue}</span>
-                </div>
-            `;
-            
-            if (Object.keys(byDay).length > 0) {
-                stats += `<div class="modal-stat"><span class="modal-label" style="font-weight:700;">Picks by Day</span></div>`;
-                Object.keys(byDay).sort().forEach(day => {
-                    stats += `<div class="modal-stat"><span class="modal-label">${day}</span><span class="modal-value">${byDay[day]}</span></div>`;
-                });
-            }
-            
-            document.getElementById('statsContent').innerHTML = stats;
-            document.getElementById('statsModal').classList.add('active');
-        };
-
-        const closeStats = () => {
-            document.getElementById('statsModal').classList.remove('active');
-        };
-
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                switchTab(e.target.dataset.tab);
-            });
-        });
-
-        document.getElementById('statsModal').addEventListener('click', (e) => {
-            if (e.target.id === 'statsModal') closeStats();
-        });
-
-        renderGames();
-    </script>
-</body>
-</html>
+<script>
+const GAMES = [
+{r:1,o:'PH
